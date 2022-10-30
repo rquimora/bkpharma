@@ -1,3 +1,32 @@
+## Deployment
+### Setup
+- git clone https://github.com/rquimora/bkpharma.git
+- cd bkpharma
+- composer install
+- cp .env.example .env
+- npm install && npm run dev
+- php artisan serve
+
+### Database
+- php artisan migrate
+- php artisan db:seed CustomerSeeder
+- php artisan db:seed ProductSeeder
+
+### URL
+- http://127.0.0.1:8000
+
+## Screenshots
+
+<img src="https://user-images.githubusercontent.com/72032410/198896172-1e8a8a06-0ae0-45a7-b2af-4e02a68d8355.png" width="500" />
+<img src="https://user-images.githubusercontent.com/72032410/198896347-20e3c0f7-f202-40aa-ac10-bd23a5375366.png" width="500" />
+
+<img src="https://user-images.githubusercontent.com/72032410/198896356-1693a38f-faba-48ab-a7a4-0546cab91888.png" width="500" />
+<img src="https://user-images.githubusercontent.com/72032410/198896362-e3b444b1-5080-44cf-ab9b-6695eab382a2.png" width="500" />
+
+<hr/>
+
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">
