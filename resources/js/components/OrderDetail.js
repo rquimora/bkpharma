@@ -1,35 +1,56 @@
+import axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 function OrderDetail() {
-    const products = [
-        { id: 1, code: "P001", name: "Product 1", price: 10 },
-        { id: 2, code: "P002", name: "Product 2", price: 20 },
-        { id: 3, code: "P003", name: "Product 3", price: 30 },
-        { id: 4, code: "P004", name: "Product 4", price: 40 },
-        { id: 5, code: "P005", name: "Product 5", price: 50 },
-    ];
+    const nav = useNavigate();
+    const { orderId } = useParams();
 
+    const [products, setProducts] = useState([]);
+    const [customers, setCustomers] = useState([]);
     const [orders, setOrders] = useState([]);
     const [total, setTotal] = useState(0);
     const [custname, setCustname] = useState("");
     const qty = useRef();
     const code = useRef();
 
+    useEffect(async () => {
+        const prod = await axios.get("/api/products");
+        setProducts(prod.data);
+
+        const cust = await axios.get("/api/customers");
+        setCustomers(cust.data);
+
+        if (orderId !== undefined) {
+            try {
+                const orDtl = await axios.get(`/api/edit/${orderId}`);
+                setCustname(orDtl.data.customer_id);
+                setOrders(orDtl.data.orders);
+                console.log(orDtl);
+            } catch (error) {
+                console.log(error.response.data.message);
+                nav("/");
+            }
+        }
+
+        console.log(orderId);
+    }, []);
+
     useEffect(() => {
-        let newTotal = orders.reduce((acc, item) => acc + item.gross, 0);
+        let newTotal = orders.reduce((acc, item) => parseFloat(acc) + parseFloat(item.gross), 0);
         setTotal(newTotal);
     }, [orders]);
 
     const addOrder = () => {
         let nCode = code.current.value;
-        let nProd = products.find((item) => item.code === nCode);
+        let nProd = products.find(
+            (item) => parseInt(item.id) === parseInt(nCode)
+        );
         let nQty = qty.current.value;
-        let nTotal = 0;
 
-        console.log(nProd);
         if (nProd && nQty) {
-            nProd.qty = nQty;
-            nProd.gross = nProd.price * nProd.qty;
+            nProd.qty = parseFloat(nQty);
+            nProd.gross = parseFloat(nProd.price) * parseFloat(nProd.qty);
 
             let newOrders = [...orders];
             newOrders.push(nProd);
@@ -43,12 +64,17 @@ function OrderDetail() {
         setOrders(filtOrders);
     };
 
-    const submitOrders = () => {
-        const data = {
+    const submitOrders = async () => {
+        let data = {
             custname,
             total,
             orders,
         };
+        
+        if(orderId !== undefined)
+        {
+            data.id = parseInt(orderId)
+        }
 
         if (total === 0) {
             alert("No orders found");
@@ -60,25 +86,38 @@ function OrderDetail() {
             return 1;
         }
 
-        console.log(data);
+        const res = await axios.post("/api/submit-order", data);
+
+        nav("/");
     };
 
     return (
         <>
             <div className="card">
                 <div className="card-header">
-                    <h1 className="card-title">Order Detail</h1>
+                    <h1 className="card-title">
+                        Order Detail - {orderId == undefined ? "New" : "Edit"}
+                    </h1>
                 </div>
                 <div className="card-body">
                     <div className="row">
                         <div className="col-sm-4">
                             <label>Customer Name</label>
-                            <input
-                                type="text"
-                                className="form-control"
+                            <select
+                                disabled={
+                                    orderId === undefined ? "" : "disabled"
+                                }
                                 value={custname}
+                                className="form-select"
                                 onChange={(e) => setCustname(e.target.value)}
-                            />
+                            >
+                                <option value="">Select Customer</option>
+                                {customers.map((item, index) => (
+                                    <option key={"c_" + index} value={item.id}>
+                                        {item.cust_name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -89,8 +128,8 @@ function OrderDetail() {
                             <select className="form-select" ref={code}>
                                 <option value="">Select Product</option>
                                 {products.map((item, index) => (
-                                    <option key={index} value={item.code}>
-                                        {item.name}
+                                    <option key={"p_" + index} value={item.id}>
+                                        {item.prod_name}
                                     </option>
                                 ))}
                             </select>
@@ -115,7 +154,7 @@ function OrderDetail() {
                                 Add
                             </button>
                         </div>
-                        <div className="col-sm-2 offset-sm-4">
+                        <div className="col-sm-4 offset-sm-2">
                             <br />
                             <button
                                 type="button"
@@ -124,6 +163,8 @@ function OrderDetail() {
                             >
                                 Submit Order
                             </button>
+                            &nbsp;
+                            <a href="/" className="btn btn-outline-secondary">Return</a>
                         </div>
                     </div>
                 </div>
@@ -145,10 +186,10 @@ function OrderDetail() {
                         <tbody>
                             {orders.map((item, index) => (
                                 <tr key={index}>
-                                    <td>{item.name}</td>
+                                    <td>{item.prod_name}</td>
                                     <td>{item.price}</td>
                                     <td>{item.qty}</td>
-                                    <td>{item.gross}</td>
+                                    <td>{parseFloat(item.gross).toFixed(2)}</td>
                                     <td>
                                         <button
                                             type="button"
@@ -162,7 +203,7 @@ function OrderDetail() {
                             ))}
                             <tr>
                                 <td colSpan="3">Total Amount</td>
-                                <td>{total}</td>
+                                <td>{parseFloat(total).toFixed(2)}</td>
                                 <td>&nbsp;</td>
                             </tr>
                         </tbody>

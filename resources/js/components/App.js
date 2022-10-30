@@ -12,6 +12,7 @@ function App() {
                 <Nav />
                 <Routes>
                     <Route path="/" element={<Orders />} />
+                    <Route path="/order-detail/:orderId" element={<OrderDetail />} />
                     <Route path="/order-detail" element={<OrderDetail />} />
                 </Routes>
             </Router>

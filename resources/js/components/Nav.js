@@ -27,16 +27,15 @@ export default class Nav extends Component {
                         >
                             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                                 <li className="nav-item">
-                                    <Link
-                                        className="nav-link active"
-                                        aria-current="page"
-                                        to="/"
-                                    >
+                                    <Link className="nav-link active" to="/">
                                         Orders
                                     </Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/order-detail">
+                                    <Link
+                                        className="nav-link active"
+                                        to="/order-detail"
+                                    >
                                         New Order
                                     </Link>
                                 </li>
